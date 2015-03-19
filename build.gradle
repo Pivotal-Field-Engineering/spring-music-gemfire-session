@@ -129,6 +129,9 @@ tomcatRun {
 }
 
 cloudfoundry {
+    username = 'my_username'
+    password = 'my_password'
+    organization = 'my-org'
     target = "https://api.run.pivotal.io"
     space = "development"
 
@@ -137,10 +140,4 @@ cloudfoundry {
     memory = 512
     instances = 1
 
-    services {
-        "music-mongodb" {
-            label = "mongolab"
-            plan = "sandbox"
-        }
-    }
 }

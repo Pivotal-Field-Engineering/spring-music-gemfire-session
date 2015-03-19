@@ -1,7 +1,9 @@
 angular.module('albums', ['ngResource', 'ui.bootstrap']).
-    factory('Albums', function ($resource) {
+    factory('Albums', function ($resource)
+    {
         return $resource('albums');
-    }).
+    }
+    ).
     factory('Album', function ($resource) {
         return $resource('albums/:id', {id: '@id'});
     }).
