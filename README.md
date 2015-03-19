@@ -1,35 +1,11 @@
 Spring Music
 ============
 
-This is a sample application for using database services on [Cloud Foundry](http://cloudfoundry.com)
-with the [Spring Framework](http://www.springframework.org).
+This is a sample application that forks from spring-music to show some basic attributes around HTTP session state in Cloud Foundry. Refer to the originating project for specific info on spring-music usage.
 
-This application has been built to store the same domain objects in one of a variety of different persistence technologies - relational, document, and key-value stores. This is not meant to represent a realistic use case for these technologies, since you would typically choose the one most applicable to the type of data you need to store, but it is useful for testing and experimenting with different types of services on Cloud Foundry. 
-
-The application use Spring Java configuration and [bean profiles](http://static.springsource.org/spring/docs/current/spring-framework-reference/html/new-in-3.1.html#new-in-3.1-bean-definition-profiles) to configure the application and the connection objects needed to use the persistence stores. It also uses the [Spring Cloud](https://github.com/spring-projects/spring-cloud) library to inspect the environment when running on Cloud Foundry. See the [Cloud Foundry documentation](http://docs.cloudfoundry.com/docs/using/services/spring-service-bindings.html) for details on configuring a Spring application for Cloud Foundry.
-
-## Running the application locally
-
-One Spring bean profile should be activated to choose the database provider that the application should use. The profile is selected by setting the system property `spring.profiles.active` when starting the app.
-
-The application can be started locally using the following command:
-
-~~~
-$ ./gradlew tomcatRun -Dspring.profiles.active=<profile>
-~~~
-
-where `<profile>` is one of the following values:
-
-* `in-memory` (no external database required)
-* `mysql`
-* `postgres`
-* `mongodb`
-* `redis`
-
-If no profile is provided, `in-memory` will be used. If any other profile is provided, the appropriate database server
-must be started separately. The application will use the host name `localhost` and the default port to connect to the database.
-
-If more than one of these profiles is provided, the application will throw an exception and fail to start.
+In this demo, you will be able to demonstrate:
+* Sticky sessions in Cloud Foundry
+* What happens with application instance failure when there is / is not a HTTP Session store service bound to the app
 
 ## Running the application on Cloud Foundry
 
@@ -61,43 +37,29 @@ urls: spring-music--sf.cfapps.io
 The application will be pushed using settings in the provided `manifest.yml` file. The output from the command will
 show the URL that has been assigned to the application.
 
+## Running the application for the first time
+
+OK, now we're ready to test out the application a bit - use the hostname provided in your 'cf push' console output to access your application. Note the information icon (a circle with an "i" in it) at the top right? Great. Click on it - it displays what services you are bound to, app profiles you're using but also which application instance index number your application is running on [0,....,n]. Since you haven't scaled your application yet, it shows instance "0". There is also a number indicating the number of album changes you have performed (add, delete, update) in this session. Right now it says "0" as well - try creating some fanciful albums (I recommend Air Supply or Jefferson Starship, as you are running this in the cloud). After refreshing the page, your Mod count should increment.
+Let's try scaling the application up to 2 instances:
+
+~~~
+$ cf scale spring-music -i 2
+~~~
+
+Return to your browser and make note of the instance your session is running on - now browse to http://YOUR_HOST_NAME/#/errors and click the "Kill" button - great, now our first instance is totally hosed, check out its status at http://console.run.pivotal.io - you might have to be quick. Refresh the page - you should your index has changed (you're running on a separate instance now) and your modification count is zeroed out. That sucks!
+
 ### Creating and binding services
 
-Using the provided manifest, the application will be created without an external database (in the `in-memory` profile).
-You can create and bind database services to the application using the information below.
+Using the provided manifest, the application will be created without an external database (in the `in-memory` profile) or an in-memory HTTP Session store.
+You can create and bind services to the application using the information below.
 
-#### System-managed services
+#### Binding a session store
 
-Depending on the Cloud Foundry service provider, persistence services might be offered and managed by the platform. These
-steps can be used to create and bind a service that is managed by the platform:
-
-~~~
-# view the services available
-$ cf marketplace
-# create a service instance
-$ cf create-service <service> <service plan> <service name>
-# bind the service instance to the application
-$ cf bind-service <app name> <service name>
-# restart the application so the new service is detected
-$ cf restart
-~~~
-
-#### User-provided services
-
-Cloud Foundry also allows service connection information and credentials to be provided by a user. In order for the
-application to detect and connect to a user-provided service, a single `uri` field should be given in the credentials
-using the form `<dbtype>://<username>:<password>@<hostname>:<port>/<databasename>`.
-
-These steps use examples for username, password, host name, and database name that should be replaced with real values.
+This example anticipates that you will be using GemFire as an HTTP Session store, but will also work with any store that replaces the session manager in Tomcat.
 
 ~~~
-# create a user-provided Oracle database service instance
-$ cf create-user-provided-service oracle-db -p '{"uri":"oracle://root:secret@dbserver.example.com:1521/mydatabase"}'
-# create a user-provided MySQL database service instance
-$ cf create-user-provided-service mysql-db -p '{"uri":"mysql://root:secret@dbserver.example.com:3306/mydatabase"}'
-# bind a service instance to the application
-$ cf bind-service <app name> <service name>
-# restart the application so the new service is detected
+$ cf create-service <> <> <>
+$ cf bind-service <> <>
 $ cf restart
 ~~~
 
