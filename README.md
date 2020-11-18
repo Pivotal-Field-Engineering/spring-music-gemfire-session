@@ -1,4 +1,4 @@
-Spring Music
+<h1> VMware has ended active development of this project, this repository will no longer be updated.</h1><br>Spring Music
 ============
 
 This is a sample application that forks from spring-music to show some basic attributes around HTTP session state in Cloud Foundry. Refer to the originating project for specific info on spring-music usage.
